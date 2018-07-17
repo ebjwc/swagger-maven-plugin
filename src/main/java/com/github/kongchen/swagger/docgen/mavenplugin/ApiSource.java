@@ -134,6 +134,9 @@ public class ApiSource {
 
     @Parameter
     private List<String> modelConverters;
+    
+    @Parameter
+    private boolean skipInheritingClasses = false;
 
     public Set<Class<?>> getValidClasses(Class<? extends Annotation> clazz) {
         Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
@@ -141,21 +144,25 @@ public class ApiSource {
             Set<Class<?>> c = new Reflections("").getTypesAnnotatedWith(clazz, true);
             classes.addAll(c);
 
-            Set<Class<?>> inherited = new Reflections("").getTypesAnnotatedWith(clazz);
-            classes.addAll(inherited);
+            if (!skipInheritingClasses) {
+                Set<Class<?>> inherited = new Reflections("").getTypesAnnotatedWith(clazz);
+                classes.addAll(inherited);
+            }
         } else {
             for (String location : locations) {
                 Set<Class<?>> c = new Reflections(location).getTypesAnnotatedWith(clazz, true);
                 classes.addAll(c);
 
-                Set<Class<?>> inherited = new Reflections(location).getTypesAnnotatedWith(clazz);
-                classes.addAll(inherited);
+                if (!skipInheritingClasses) {
+                    Set<Class<?>> inherited = new Reflections(location).getTypesAnnotatedWith(clazz);
+                    classes.addAll(inherited);
+                }
             }
         }
 
         return classes;
     }
-
+    
     public List<String> getApiModelPropertyAccessExclusions() {
         return apiModelPropertyAccessExclusions;
     }
