@@ -11,7 +11,6 @@ import com.github.kongchen.swagger.docgen.AbstractDocumentSource;
 import com.github.kongchen.swagger.docgen.GenerateException;
 import com.github.kongchen.swagger.docgen.reader.ClassSwaggerReader;
 import com.github.kongchen.swagger.docgen.reader.SpringMvcApiReader;
-import com.google.common.collect.Sets;
 
 /**
  * @author tedleman
@@ -30,13 +29,13 @@ public class SpringMavenDocumentSource extends AbstractDocumentSource {
 
     @Override
     protected Set<Class<?>> getValidClasses() {
-        Set result = super.getValidClasses();
-        result.addAll(apiSource.getValidClasses(RestController.class));
-        result.addAll(apiSource.getValidClasses(ControllerAdvice.class));
+        Set<Class<?>> result = super.getValidClasses();
+        addAllFiltered(result, apiSource.getValidClasses(RestController.class));
+        addAllFiltered(result, apiSource.getValidClasses(ControllerAdvice.class));
         return result;
     }
 
-    @Override
+	@Override
     protected ClassSwaggerReader resolveApiReader() throws GenerateException {
         String customReaderClassName = apiSource.getSwaggerApiReader();
         if (customReaderClassName == null) {
@@ -52,5 +51,25 @@ public class SpringMavenDocumentSource extends AbstractDocumentSource {
             return customApiReader;
         }
     }
+	
+	private void addAllFiltered(Set<Class<?>> targetSet, Set<Class<?>> classes) {
+   	 if (this.apiSource.isSkipInheritingClasses()) {
+        	for (Class<?> clazz : classes) {
+        		if (!isSubClassOfAny(clazz, targetSet)) {
+        			targetSet.add(clazz);
+        		}
+        	}
+        } else {
+       	 targetSet.addAll(classes);
+        }
+	}
 
+	private boolean isSubClassOfAny(Class<?> clazz, Set<Class<?>> classes) {
+   	for (Class<?> c : classes) {
+   		if (c.isAssignableFrom(clazz)) {
+   			return true;
+   		}
+		}
+   	return false;
+	}
 }

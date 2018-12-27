@@ -447,7 +447,15 @@ public class ApiSource {
         this.useEnhancedOperationId = useEnhancedOperationId;
     }
 
-    private String emptyToNull(String str) {
+    public boolean isSkipInheritingClasses() {
+		return skipInheritingClasses;
+	}
+
+	public void setSkipInheritingClasses(boolean skipInheritingClasses) {
+		this.skipInheritingClasses = skipInheritingClasses;
+	}
+
+	private String emptyToNull(String str) {
         return StringUtils.isEmpty(str) ? null : str;
     }
 }
